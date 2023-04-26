@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Department } from 'src/app/interfaces/department';
 import { DepartmentsService } from 'src/app/services/departments.service'
-import { FormControl } from '@angular/forms';
+import { FormControl, ValidatorFn, AbstractControl } from '@angular/forms';
 import { Employee } from '../../interfaces/employee'
 
 @Component({
@@ -13,7 +13,7 @@ import { Employee } from '../../interfaces/employee'
 export class TimesheetsComponent implements OnInit {
   departments: Department[] | undefined;
   department: Department | undefined;
-  employeeNameFC = new FormControl('');
+  employeeNameFC = new FormControl('', this.nameValidator());
   employees: Employee [] = [];
   employeeId = 0;
 
@@ -39,5 +39,19 @@ addEmployee(): void {
 
         this.employeeNameFC.setValue('');
     }
+  }
+
+  nameValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+        let error = null;
+        if (this.employees && this.employees.length) {
+            this.employees.forEach(employee => {
+                if (employee.name.toLowerCase() === control.value.toLowerCase()) {
+                    error = {duplicate: true};
+                }
+            });
+        }
+        return error;
+    };
   }
 }
